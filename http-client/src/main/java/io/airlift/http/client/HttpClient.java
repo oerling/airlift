@@ -41,7 +41,7 @@ public interface HttpClient
     {
         return 11;
     }
-    
+
     RequestStats getStats();
 
     long getMaxContentLength();
