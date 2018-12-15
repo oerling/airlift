@@ -29,6 +29,19 @@ public interface HttpClient
 
     <T, E extends Exception> HttpResponseFuture<T> executeAsync(Request request, ResponseHandler<T, E> responseHandler);
 
+    default <T, E extends Exception> HttpResponseFuture<T> executeAsync(Request request, ResponseHandler<T, E> responseHandler, ByteArrayAllocator allocator)
+    {
+        if (allocator != null) {
+            throw new UnsupportedOperationException();
+        }
+        return executeAsync(request, responseHandler);
+    }
+
+    default int zippy()
+    {
+        return 11;
+    }
+    
     RequestStats getStats();
 
     long getMaxContentLength();

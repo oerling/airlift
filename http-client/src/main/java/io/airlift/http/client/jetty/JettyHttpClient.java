@@ -543,7 +543,7 @@ public class JettyHttpClient
 
         JettyResponseFuture<T, E> future = new JettyResponseFuture<>(request, jettyRequest, responseHandler, stats, recordRequestComplete);
 
-        BufferingResponseListener listener = new BufferingResponseListener(future, Ints.saturatedCast(maxContentLength));
+        BufferingResponseListener listener = new BufferingResponseListener(future, Ints.saturatedCast(maxContentLength), null);
 
         long requestTimestamp = System.currentTimeMillis();
 
