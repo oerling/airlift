@@ -180,6 +180,10 @@ public class JettyHttpClient
             }
         }
         sslContextFactory.setSecureRandomAlgorithm(config.getSecureRandomAlgorithm());
+        List<String> includedCipherSuites = config.getHttpsIncludedCipherSuites();
+        List<String> excludedCipherSuites = config.getHttpsExcludedCipherSuites();
+        sslContextFactory.setIncludeCipherSuites(includedCipherSuites.toArray(new String[0]));
+        sslContextFactory.setExcludeCipherSuites(excludedCipherSuites.toArray(new String[0]));
 
         HttpClientTransport transport;
         if (config.isHttp2Enabled()) {
@@ -195,6 +199,10 @@ public class JettyHttpClient
         }
 
         httpClient = new AuthorizationPreservingHttpClient(transport, sslContextFactory);
+
+        // request and response buffer size
+        httpClient.setRequestBufferSize(toIntExact(config.getRequestBufferSize().toBytes()));
+        httpClient.setResponseBufferSize(toIntExact(config.getResponseBufferSize().toBytes()));
 
         // Kerberos authentication
         if (config.getAuthenticationEnabled()) {
@@ -523,11 +531,6 @@ public class JettyHttpClient
                 recordRequestComplete(stats, request, requestStart, jettyResponse, responseStart);
             }
         }
-        ResponseInfo responseInfo = ResponseInfo.from(Optional.of(response),
-                jettyResponse.getBytesRead(),
-                requestListener.getResponseStarted(),
-                requestListener.getResponseFinished());
-        requestLogger.log(requestInfo, responseInfo);
         return value;
     }
 

@@ -15,7 +15,9 @@
  */
 package io.airlift.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -28,10 +30,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.testng.annotations.BeforeClass;
@@ -44,6 +44,7 @@ import java.util.Map;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static io.airlift.json.JsonBinder.jsonBinder;
+import static java.util.Objects.requireNonNull;
 import static org.joda.time.DateTimeZone.UTC;
 import static org.testng.Assert.assertEquals;
 
@@ -64,14 +65,9 @@ public class TestJsonModule
             throws Exception
     {
         Injector injector = Guice.createInjector(new JsonModule(),
-                new Module()
-                {
-                    @Override
-                    public void configure(Binder binder)
-                    {
-                        jsonBinder(binder).addSerializerBinding(SuperDuperNameList.class).toInstance(ToStringSerializer.instance);
-                        jsonBinder(binder).addDeserializerBinding(SuperDuperNameList.class).to(SuperDuperNameListDeserializer.class);
-                    }
+                binder -> {
+                    jsonBinder(binder).addSerializerBinding(SuperDuperNameList.class).toInstance(ToStringSerializer.instance);
+                    jsonBinder(binder).addDeserializerBinding(SuperDuperNameList.class).to(SuperDuperNameListDeserializer.class);
                 });
         objectMapper = injector.getInstance(ObjectMapper.class);
     }
@@ -141,6 +137,25 @@ public class TestJsonModule
 
         // Jackson should deserialize the object correctly with the extra unknown data
         assertEquals(objectMapper.readValue(objectMapper.writeValueAsString(data), Car.class), CAR);
+    }
+
+    @Test
+    public void testPropertyNamesFromParameterNames()
+            throws Exception
+    {
+        NoJsonPropertiesInJsonCreator value = new NoJsonPropertiesInJsonCreator("first value", "second value");
+        NoJsonPropertiesInJsonCreator mapped = objectMapper.readValue(objectMapper.writeValueAsString(value), NoJsonPropertiesInJsonCreator.class);
+        assertEquals(mapped.getFirst(), "first value");
+        assertEquals(mapped.getSecond(), "second value");
+    }
+
+    @Test
+    public void testJsonValueAndStaticFactoryMethod()
+            throws Exception
+    {
+        JsonValueAndStaticFactoryMethod value = JsonValueAndStaticFactoryMethod.valueOf("some value");
+        JsonValueAndStaticFactoryMethod mapped = objectMapper.readValue(objectMapper.writeValueAsString(value), JsonValueAndStaticFactoryMethod.class);
+        assertEquals(mapped.getValue(), "some value");
     }
 
     private Map<String, Object> createCarMap()
@@ -315,6 +330,53 @@ public class TestJsonModule
                     .add("notes", notes)
                     .add("nameList", nameList)
                     .toString();
+        }
+    }
+
+    public static class NoJsonPropertiesInJsonCreator
+    {
+        private final String first;
+        private final String second;
+
+        @JsonCreator
+        public NoJsonPropertiesInJsonCreator(/* no @JsonProperty here*/ String first, String second)
+        {
+            this.first = first;
+            this.second = second;
+        }
+
+        @JsonProperty
+        public String getFirst()
+        {
+            return first;
+        }
+
+        @JsonProperty
+        public String getSecond()
+        {
+            return second;
+        }
+    }
+
+    public static class JsonValueAndStaticFactoryMethod
+    {
+        private final String value;
+
+        @JsonCreator
+        public static JsonValueAndStaticFactoryMethod valueOf(String value)
+        {
+            return new JsonValueAndStaticFactoryMethod(value);
+        }
+
+        private JsonValueAndStaticFactoryMethod(String value)
+        {
+            this.value = requireNonNull(value, "value is null");
+        }
+
+        @JsonValue
+        public String getValue()
+        {
+            return value;
         }
     }
 

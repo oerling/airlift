@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import io.airlift.discovery.client.DiscoveryBinder;
 
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
@@ -42,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static io.airlift.discovery.client.DiscoveryBinder.discoveryBinder;
 import static io.airlift.jaxrs.JaxrsBinder.jaxrsBinder;
 import static io.airlift.json.JsonBinder.jsonBinder;
 
@@ -61,7 +61,7 @@ public class JmxHttpModule
         jsonBinder(binder).addSerializerBinding(CompositeData.class).to(CompositeDataSerializer.class);
         jsonBinder(binder).addSerializerBinding(TabularData.class).to(TabularDataSerializer.class);
 
-        DiscoveryBinder.discoveryBinder(binder).bindHttpAnnouncement("jmx-http");
+        discoveryBinder(binder).bindHttpAnnouncement("jmx-http");
     }
 
     public static class TabularDataSerializer
@@ -185,7 +185,7 @@ public class JmxHttpModule
         if (keySet != null) {
             for (List<?> key : keySet) {
                 if (key != null && !key.isEmpty()) {
-                    Object[] index = key.toArray(new Object[key.size()]);
+                    Object[] index = key.toArray(new Object[0]);
                     CompositeData value = data.get(index);
                     if (value != null) {
                         builder.add(toMap(value));

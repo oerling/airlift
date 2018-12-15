@@ -40,7 +40,7 @@ public class TimedStatTest
     public void testBasic()
     {
         TimedStat stat = new TimedStat();
-        List<Double> values = new ArrayList<Double>(VALUES);
+        List<Double> values = new ArrayList<>(VALUES);
         for (int i = 0; i < VALUES; i++) {
             values.add((double) i);
         }
@@ -83,14 +83,9 @@ public class TimedStatTest
             throws Exception
     {
         TimedStat stat = new TimedStat();
-        stat.time(new Callable<Void>()
-        {
-            @Override
-            public Void call()
-            {
-                LockSupport.parkNanos(SECONDS.toNanos(10));
-                return null;
-            }
+        stat.time((Callable<Void>) () -> {
+            LockSupport.parkNanos(SECONDS.toNanos(10));
+            return null;
         });
 
         assertEquals(stat.getCount(), 1);

@@ -19,11 +19,13 @@ import com.google.common.collect.ImmutableMap;
 import io.airlift.configuration.testing.ConfigAssertions;
 import io.airlift.units.DataSize;
 import io.airlift.units.Duration;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-import static io.airlift.units.DataSize.Unit.BYTE;
 import static io.airlift.units.DataSize.Unit.GIGABYTE;
 import static io.airlift.units.DataSize.Unit.KILOBYTE;
 import static io.airlift.units.DataSize.Unit.MEGABYTE;
@@ -44,7 +46,7 @@ public class TestHttpServerConfig
                 .setHttpsPort(8443)
                 .setSecureRandomAlgorithm(null)
                 .setHttpsIncludedCipherSuites("")
-                .setHttpsExcludedCipherSuites("")
+                .setHttpsExcludedCipherSuites(String.join(",", getJettyDefaultExcludedCiphers()))
                 .setSslSessionTimeout(new Duration(4, HOURS))
                 .setSslSessionCacheSize(10_000)
                 .setKeystorePath(null)
@@ -54,7 +56,7 @@ public class TestHttpServerConfig
                 .setTrustStorePassword(null)
                 .setLogPath("var/log/http-request.log")
                 .setLogEnabled(true)
-                .setLogMaxFileSize(new DataSize(Long.MAX_VALUE, BYTE))
+                .setLogMaxFileSize(new DataSize(100, MEGABYTE))
                 .setLogHistory(15)
                 .setLogQueueSize(10_000)
                 .setLogCompressionEnabled(true)
@@ -171,5 +173,11 @@ public class TestHttpServerConfig
                 .setHttp2StreamIdleTimeout(new Duration(23, SECONDS));
 
         ConfigAssertions.assertFullMapping(properties, expected);
+    }
+
+    private List<String> getJettyDefaultExcludedCiphers()
+    {
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        return Arrays.asList(sslContextFactory.getExcludeCipherSuites());
     }
 }

@@ -4,7 +4,7 @@
 
     <artifactId>airlift</artifactId>
     <packaging>pom</packaging>
-    <version>0.173-SNAPSHOT</version>
+    <version>0.178-SNAPSHOT</version>
 
     <name>airlift</name>
     <description>Airlift</description>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>io.airlift</groupId>
         <artifactId>airbase</artifactId>
-        <version>80</version>
+        <version>88</version>
     </parent>
 
     <inceptionYear>2010</inceptionYear>
@@ -25,9 +25,9 @@
         <air.check.skip-license>true</air.check.skip-license>
         <air.java.version>1.8.0-40</air.java.version>
 
-        <dep.airlift.version>0.173-SNAPSHOT</dep.airlift.version>
+        <dep.airlift.version>0.178-SNAPSHOT</dep.airlift.version>
         <dep.packaging.version>${dep.airlift.version}</dep.packaging.version>
-        <dep.jetty.version>9.4.12.RC0</dep.jetty.version>
+        <dep.jetty.version>9.4.14.v20181114</dep.jetty.version>
         <dep.jersey.version>2.26</dep.jersey.version>
     </properties>
 
@@ -434,18 +434,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.ning.maven.plugins</groupId>
-                    <artifactId>maven-dependency-versions-check-plugin</artifactId>
-                    <configuration>
-                        <useParallelDependencyResolution>false</useParallelDependencyResolution>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

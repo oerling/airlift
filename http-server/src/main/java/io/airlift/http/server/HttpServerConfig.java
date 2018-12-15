@@ -32,7 +32,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-import static io.airlift.units.DataSize.Unit.BYTE;
 import static io.airlift.units.DataSize.Unit.KILOBYTE;
 import static io.airlift.units.DataSize.Unit.MEGABYTE;
 import static java.util.Objects.requireNonNull;
@@ -72,7 +71,12 @@ public class HttpServerConfig
     private String trustStorePassword;
     private String secureRandomAlgorithm;
     private List<String> includedCipherSuites = ImmutableList.of();
-    private List<String> excludedCipherSuites = ImmutableList.of();
+
+    /**
+     * This property is initialized with Jetty's default excluded ciphers list.
+     * @see org.eclipse.jetty.util.ssl.SslContextFactory#SslContextFactory(boolean, String)
+     */
+    private List<String> excludedCipherSuites = ImmutableList.of("^.*_(MD5|SHA|SHA1)$", "^TLS_RSA_.*$", "^SSL_.*$", "^.*_NULL_.*$", "^.*_anon_.*$");
 
     private Duration sslSessionTimeout = new Duration(4, HOURS);
     private int sslSessionCacheSize = 10_000;
@@ -81,7 +85,7 @@ public class HttpServerConfig
     private boolean logEnabled = true;
     private int logHistory = 15;
     private int logQueueSize = 10_000;
-    private DataSize logMaxFileSize = new DataSize(Long.MAX_VALUE, BYTE);
+    private DataSize logMaxFileSize = new DataSize(100, MEGABYTE);
     private boolean logCompressionEnabled = true;
 
     private Integer httpAcceptorThreads;
@@ -292,6 +296,7 @@ public class HttpServerConfig
     }
 
     @Config("http-server.https.excluded-cipher")
+    @ConfigDescription("Setting this config property overwrites Jetty's default excluded cipher suites")
     public HttpServerConfig setHttpsExcludedCipherSuites(String excludedCipherSuites)
     {
         this.excludedCipherSuites = Splitter
@@ -548,7 +553,7 @@ public class HttpServerConfig
         return this;
     }
 
-    @Min(0)
+    @Min(1)
     public int getHttp2MaxConcurrentStreams()
     {
         return http2MaxConcurrentStreams;

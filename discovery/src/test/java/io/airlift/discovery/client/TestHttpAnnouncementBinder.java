@@ -16,11 +16,9 @@
 package io.airlift.discovery.client;
 
 import com.google.common.collect.Iterables;
-import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import io.airlift.discovery.client.testing.TestingDiscoveryModule;
 import org.testng.annotations.Test;
@@ -28,6 +26,7 @@ import org.testng.annotations.Test;
 import java.net.URI;
 import java.util.Set;
 
+import static io.airlift.discovery.client.DiscoveryBinder.discoveryBinder;
 import static io.airlift.discovery.client.ServiceAnnouncement.serviceAnnouncement;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -45,14 +44,9 @@ public class TestHttpAnnouncementBinder
 
         Injector injector = Guice.createInjector(
                 new TestingDiscoveryModule(),
-                new Module()
-                {
-                    @Override
-                    public void configure(Binder binder)
-                    {
-                        binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
-                        DiscoveryBinder.discoveryBinder(binder).bindHttpAnnouncement("apple");
-                    }
+                binder -> {
+                    binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
+                    discoveryBinder(binder).bindHttpAnnouncement("apple");
                 });
 
         ServiceAnnouncement announcement = serviceAnnouncement("apple")
@@ -78,14 +72,9 @@ public class TestHttpAnnouncementBinder
 
         Injector injector = Guice.createInjector(
                 new TestingDiscoveryModule(),
-                new Module()
-                {
-                    @Override
-                    public void configure(Binder binder)
-                    {
-                        binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
-                        DiscoveryBinder.discoveryBinder(binder).bindHttpAnnouncement("apple");
-                    }
+                binder -> {
+                    binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
+                    discoveryBinder(binder).bindHttpAnnouncement("apple");
                 });
 
         ServiceAnnouncement announcement = serviceAnnouncement("apple")
@@ -111,14 +100,9 @@ public class TestHttpAnnouncementBinder
 
         Injector injector = Guice.createInjector(
                 new TestingDiscoveryModule(),
-                new Module()
-                {
-                    @Override
-                    public void configure(Binder binder)
-                    {
-                        binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
-                        DiscoveryBinder.discoveryBinder(binder).bindHttpAnnouncement("apple");
-                    }
+                binder -> {
+                    binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
+                    discoveryBinder(binder).bindHttpAnnouncement("apple");
                 });
 
         ServiceAnnouncement announcement = serviceAnnouncement("apple")
@@ -146,14 +130,9 @@ public class TestHttpAnnouncementBinder
 
         Injector injector = Guice.createInjector(
                 new TestingDiscoveryModule(),
-                new Module()
-                {
-                    @Override
-                    public void configure(Binder binder)
-                    {
-                        binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
-                        DiscoveryBinder.discoveryBinder(binder).bindHttpAnnouncement("apple").addProperty("a", "apple");
-                    }
+                binder -> {
+                    binder.bind(AnnouncementHttpServerInfo.class).toInstance(httpServerInfo);
+                    discoveryBinder(binder).bindHttpAnnouncement("apple").addProperty("a", "apple");
                 });
 
         ServiceAnnouncement announcement = serviceAnnouncement("apple")

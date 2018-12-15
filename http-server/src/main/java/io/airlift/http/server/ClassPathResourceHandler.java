@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Ness Computing, Inc.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,18 +19,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import javax.annotation.Nullable;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
 
@@ -85,7 +82,7 @@ public class ClassPathResourceHandler
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException
+            throws IOException
     {
         if (baseRequest.isHandled()) {
             return;
@@ -122,16 +119,7 @@ public class ClassPathResourceHandler
                 return;
             }
 
-            // Send the content out. Lifted straight out of ResourceHandler.java
-            OutputStream out;
-            try {
-                out = response.getOutputStream();
-            }
-            catch (IllegalStateException e) {
-                out = new WriterOutputStream(response.getWriter());
-            }
-
-            ByteStreams.copy(resourceStream, out);
+            ByteStreams.copy(resourceStream, response.getOutputStream());
         }
         finally {
             closeQuietly(resourceStream);
