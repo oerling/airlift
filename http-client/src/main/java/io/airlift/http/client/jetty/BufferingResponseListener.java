@@ -99,8 +99,13 @@ class BufferingResponseListener
     private synchronized void allocateCurrentBuffer()
     {
         checkState(currentBufferPosition >= currentBuffer.length, "there is still remaining space in currentBuffer");
-
-        currentBuffer = new byte[(int) min(BUFFER_MAX_BYTES, max(2 * currentBuffer.length, BUFFER_MIN_BYTES))];
+        int size = (int) min(BUFFER_MAX_BYTES, max(2 * currentBuffer.length, BUFFER_MIN_BYTES));
+        if (allocator != null) {
+            currentBuffer = allocator.allocate(size);
+        }
+        else {
+            currentBuffer = new byte[size];
+        }
         buffers.add(currentBuffer);
         currentBufferPosition = 0;
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
 import com.google.common.primitives.Ints;
 import io.airlift.http.client.BodyGenerator;
+import io.airlift.http.client.ByteArrayAllocator;
 import io.airlift.http.client.FileBodyGenerator;
 import io.airlift.http.client.HttpClientConfig;
 import io.airlift.http.client.HttpRequestFilter;
@@ -535,18 +536,17 @@ public class JettyHttpClient
     }
 
     @Override
-    public <T, E extends Exception> HttpResponseFuture<T> executeAsync(Request request, ResponseHandler<T, E> responseHandler)
+    public <T, E extends Exception> HttpResponseFuture<T> executeAsync(Request request, ResponseHandler<T, E> responseHandler, ByteArrayAllocator allocator)
     {
         requireNonNull(request, "request is null");
         requireNonNull(responseHandler, "responseHandler is null");
-
         request = applyRequestFilters(request);
 
         HttpRequest jettyRequest = buildJettyRequest(request, new JettyRequestListener(request.getUri()));
 
         JettyResponseFuture<T, E> future = new JettyResponseFuture<>(request, jettyRequest, responseHandler, stats, recordRequestComplete);
 
-        BufferingResponseListener listener = new BufferingResponseListener(future, Ints.saturatedCast(maxContentLength), null);
+        BufferingResponseListener listener = new BufferingResponseListener(future, Ints.saturatedCast(maxContentLength), allocator);
 
         long requestTimestamp = System.currentTimeMillis();
 
