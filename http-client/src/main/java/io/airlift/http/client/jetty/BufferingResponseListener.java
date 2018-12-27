@@ -1,5 +1,6 @@
 package io.airlift.http.client.jetty;
 
+import io.airlift.http.client.ByteArrayAllocator;
 import io.airlift.http.client.GatheringByteArrayInputStream;
 import io.airlift.http.client.ResponseTooLargeException;
 import io.airlift.units.DataSize;
@@ -30,6 +31,7 @@ class BufferingResponseListener
     private static final long BUFFER_MIN_BYTES = new DataSize(1, KILOBYTE).toBytes();
     private final JettyResponseFuture<?, ?> future;
     private final int maxLength;
+    private final ByteArrayAllocator allocator;
 
     @GuardedBy("this")
     private byte[] currentBuffer = new byte[0];
@@ -40,11 +42,12 @@ class BufferingResponseListener
     @GuardedBy("this")
     private long size;
 
-    public BufferingResponseListener(JettyResponseFuture<?, ?> future, int maxLength)
+    public BufferingResponseListener(JettyResponseFuture<?, ?> future, int maxLength, ByteArrayAllocator allocator)
     {
         this.future = requireNonNull(future, "future is null");
         checkArgument(maxLength > 0, "maxLength must be greater than zero");
         this.maxLength = maxLength;
+        this.allocator = allocator;
     }
 
     @Override
@@ -96,8 +99,13 @@ class BufferingResponseListener
     private synchronized void allocateCurrentBuffer()
     {
         checkState(currentBufferPosition >= currentBuffer.length, "there is still remaining space in currentBuffer");
-
-        currentBuffer = new byte[(int) min(BUFFER_MAX_BYTES, max(2 * currentBuffer.length, BUFFER_MIN_BYTES))];
+        int size = (int) min(BUFFER_MAX_BYTES, max(2 * currentBuffer.length, BUFFER_MIN_BYTES));
+        if (allocator != null) {
+            currentBuffer = allocator.allocate(size);
+        }
+        else {
+            currentBuffer = new byte[size];
+        }
         buffers.add(currentBuffer);
         currentBufferPosition = 0;
     }

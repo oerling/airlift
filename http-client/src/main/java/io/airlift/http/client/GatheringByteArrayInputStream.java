@@ -17,9 +17,14 @@ import static java.util.Objects.requireNonNull;
 @ThreadSafe
 public class GatheringByteArrayInputStream
         extends InputStream
+                implements ByteArraySupplier
 {
     @GuardedBy("this")
     private final Iterator<byte[]> buffers;
+    @GuardedBy("this")
+    private final List<byte[]> bufferList;
+    @GuardedBy("this")
+    private final long totalBytes;
     @GuardedBy("this")
     private final byte[] singleByte = new byte[1];
     @GuardedBy("this")
@@ -32,7 +37,8 @@ public class GatheringByteArrayInputStream
     public GatheringByteArrayInputStream(List<byte[]> buffers, long totalBytes)
     {
         checkArgument(totalBytes >= 0, "totalBytes should equal to or greater than 0");
-
+        this.bufferList = buffers;
+        this.totalBytes = totalBytes;
         this.buffers = requireNonNull(buffers, "buffers is null").iterator();
         this.remainingBytes = totalBytes;
     }
@@ -112,5 +118,16 @@ public class GatheringByteArrayInputStream
 
         currentBuffer = buffers.next();
         currentBufferPosition = 0;
+    }
+
+    @Override
+    public Iterable<byte[]> get()
+    {
+        return bufferList;
+    }
+
+    public long getTotalBytes()
+    {
+        return totalBytes;
     }
 }
