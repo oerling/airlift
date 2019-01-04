@@ -24,7 +24,6 @@ public class GatheringByteArrayInputStream
     @GuardedBy("this")
     private final List<byte[]> bufferList;
     @GuardedBy("this")
-
     private final long totalBytes;
     @GuardedBy("this")
     private final byte[] singleByte = new byte[1];
