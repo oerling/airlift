@@ -55,6 +55,11 @@ public interface Response
         return false;
     }
 
+    default long getTotalBytes()
+    {
+        return -1;
+    }
+
     default List<byte[]> getBuffers()
     {
         throw new UnsupportedOperationException();

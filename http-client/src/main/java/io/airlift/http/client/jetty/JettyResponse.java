@@ -19,6 +19,7 @@ class JettyResponse
 {
     private final Response response;
     private final CountingInputStream inputStream;
+    private final long totalBytes;
     private final List<byte[]> buffers;
     private final ListMultimap<HeaderName, String> headers;
     public JettyResponse(Response response, InputStream inputStream)
@@ -28,6 +29,7 @@ class JettyResponse
         this.headers = toHeadersMap(response.getHeaders());
         if (inputStream instanceof GatheringByteArrayInputStream) {
             GatheringByteArrayInputStream stream = (GatheringByteArrayInputStream) inputStream;
+            totalBytes = stream.getTotalBytes();
             buffers = new ArrayList();
             for (byte[] buffer : stream.get()) {
                 buffers.add(buffer);
@@ -35,6 +37,7 @@ class JettyResponse
         }
         else {
             buffers = null;
+            totalBytes = 0;
         }
     }
 
@@ -79,7 +82,12 @@ class JettyResponse
     {
         return buffers;
     }
-
+    @Override
+    public long getTotalBytes()
+    {
+        return totalBytes;
+    }
+    
     @Override
     public String toString()
     {
